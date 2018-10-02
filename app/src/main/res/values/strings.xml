@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Sports Control</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_user_id">Usuario</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="action_sign_in">Iniciar Sesión</string>
+    <string name="action_sign_in_short">Iniciar Sesión</string>
+    <string name="error_invalid_user_id">Número de identificación inválido</string>
+    <string name="error_invalid_password">Contraseña inválida</string>
+    <string name="error_incorrect_password">La contraseña es incorrecta</string>
+    <string name="error_field_required">Este campo es requerido</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="error_server">Error del servidor</string>
+    <string name="error_network">Conexión de red no disponible</string>
+    <string name="str_title_welcome">BIENVENID@!</string>
+    <string name="str_title_app">BIENVENID@ A SPORT CONTOL</string>
+    <string name="Descripción">Descripción</string>
+    <string name="title_activity_menu">MenuActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Sports Control</string>
+    <string name="nav_header_subtitle">www.sportscontrol.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_exit">Cerrar Sesión</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_opciones">OpcionesActivity</string>
+    <string name="action_home">Inicio</string>
+    <string name="str_switch_login">Recordarme</string>
+    <string name="action_nuevo_entrenamiento">Adicionar Entrenamiento</string>
+    <string name="entrenamiento">Nombre del Entrenamiento</string>
+    <string name="action_descripcion_entrenamiento">¿Alguna novedad antes de iniciar el entrenamiento?</string>
+
+</resources>
