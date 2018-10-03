@@ -24,10 +24,12 @@
             android:layout_marginLeft="15dp"
             android:layout_toRightOf="@id/id_imagen_atleta_elist">
 
-            <CheckBox
+            <TextView
                 android:id="@+id/id_atleta_entreno_elist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:textSize="16sp"
                 android:text="1"/>
 
             <TextView

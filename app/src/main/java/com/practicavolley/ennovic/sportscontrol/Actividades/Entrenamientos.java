@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -32,6 +33,8 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
@@ -169,12 +172,12 @@ public class Entrenamientos extends AppCompatActivity {
             }
         }){
             //LOS CAMPOS EN VERDE DEBEN SER IGUAL AL DEL ARCHIVO PHP
-            /*protected Map<String, String> getParams() throws AuthFailureError {
+            protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("id", IDUSUARIO);
-                params.put("liga", String.valueOf(getIntent().getStringExtra("idliga")));
+                //params.put("liga", String.valueOf(getIntent().getStringExtra("idliga")));
                 return params;
-            }*/
+            }
         };
 
         // Add JsonArrayRequest to the RequestQueue

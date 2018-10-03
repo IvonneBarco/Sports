@@ -1,11 +1,14 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -33,6 +36,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
@@ -44,9 +48,11 @@ public class ListaAtletas extends AppCompatActivity {
     private DeportesVo sport;
     TextView nomdeporte, iddeporte;
 
-    private String IDUSUARIO, ROLEUSUARIO;
+    private String IDUSUARIO, ROLEUSUARIO, NOMBREUSUARIO;
     int idliga = 1;
 
+    String[] datosid;
+    String[][] datos = null;
 
 
     //RECYCLER
@@ -60,8 +66,13 @@ public class ListaAtletas extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_atletas);
 
+        consulta();
+
         IDUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_ID_USUARIO_LOGIN);
         ROLEUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_ROLE_USUARIO_LOGIN);
+        NOMBREUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_NOMBRE_USUARIO_LOGIN);
+
+        Log.i("DATOS USUARIO: ", IDUSUARIO + " " + ROLEUSUARIO + " " + NOMBREUSUARIO);
 
         // Codigo flecha atras...
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -127,6 +138,21 @@ public class ListaAtletas extends AppCompatActivity {
 
                                 }
                                 AdaptadorAtletasAsistencia adapter = new AdaptadorAtletasAsistencia(listaAtletas);
+
+                                //evento click
+                                adapter.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        //Toast.makeText(getApplicationContext(), "" + listaAtletas.get(recyclerAtletas.getChildAdapterPosition(view)).getIdatleta(), Toast.LENGTH_SHORT).show();
+                                        Log.i("VALOR CHECKBOC ", listaAtletas.get(recyclerAtletas.getChildAdapterPosition(view)).getIdatleta());
+                                        String id = listaAtletas.get(recyclerAtletas.getChildAdapterPosition(view)).getIdatleta();
+                                        String NOMBREATLETA =  listaAtletas.get(recyclerAtletas.getChildAdapterPosition(view)).getNombreatleta() + " " + listaAtletas.get(recyclerAtletas.getChildAdapterPosition(view)).getApellidoatleta();
+                                        //sendEmail(datos[0][5],datos[0][3]+" "+datos[0][4]," "+NOMBREUSUARIO + " ");
+                                        sendEmail(datos[0][5],NOMBREATLETA," "+NOMBREUSUARIO + " ");
+                                    }
+                                });
+                                //fin evento click
+
                                 recyclerAtletas.setAdapter(adapter);
                             }
                         } catch (JSONException e) {
@@ -156,5 +182,82 @@ public class ListaAtletas extends AppCompatActivity {
 
         // Add JsonArrayRequest to the RequestQueue
         requestQueue.add(stringRequest);
+    }
+
+
+
+    public void consulta(){
+        RequestQueue queue= Volley.newRequestQueue(this);
+
+        StringRequest stringRequest=new StringRequest(Request.Method.POST, "https://www.guialistas.com.br/celular/vista/listar-atletasgmedico.php", new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+                try {
+                    JSONObject root = new JSONObject(response);
+                    final JSONArray arrsemanas = root.getJSONArray("grupomedico");
+                    datos =new String[arrsemanas.length()][7];
+                    datosid=new String[arrsemanas.length()];
+                    if (arrsemanas.length()>0) {
+
+                        //datos de atletas en una matriz para su uso
+                        for (int i = 0; i < arrsemanas.length(); i++) {
+                            JSONObject arrsemana = arrsemanas.getJSONObject(i);
+                            datosid[i]=arrsemana.getString("id");
+                            datos[i][0]=arrsemana.getString("entreatle");
+                            datos[i][1]=arrsemana.getString("idatle");
+                            datos[i][2]=arrsemana.getString("id");
+                            datos[i][3]=arrsemana.getString("nombre");
+                            datos[i][4]=arrsemana.getString("apellido");
+                            datos[i][5]=arrsemana.getString("mail");
+                            datos[i][6]=arrsemana.getString("perfil");
+                            //Log.d("datos",arrsemana.getString("nombre"));
+
+                        }
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+
+            }
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params=new HashMap<>();
+                params.put("id", IDUSUARIO);
+
+
+                return params;
+            }
+        };
+        queue.add(stringRequest);
+    }
+
+    protected void sendEmail(String mail,String nombre, String entrenador) {
+
+        String[] TO = {mail}; //aquí pon tu correo
+        String[] CC = {""};
+        Intent emailIntent = new Intent(Intent.ACTION_SEND);
+        emailIntent.setData(Uri.parse("mailto:"));
+        emailIntent.setType("text/plain");
+        emailIntent.putExtra(Intent.EXTRA_EMAIL, TO);
+        emailIntent.putExtra(Intent.EXTRA_CC, CC);
+// Esto podrás modificarlo si quieres, el asunto y el cuerpo del mensaje
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Solicitud de apoyo");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Hola, el entrenador " + entrenador +" solicita tus conocimientos para que pueda ayudar a su deportista "+nombre+" comunicate con el lo mas pronto posible y acuerden el lugar y la fecha muchas gracias.");
+
+        try {
+            startActivity(Intent.createChooser(emailIntent, "Enviar email..."));
+            finish();
+        } catch (android.content.ActivityNotFoundException ex) {
+            Toast.makeText(this,"No tienes clientes de email instalados.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

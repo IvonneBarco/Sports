@@ -247,7 +247,7 @@
                 <!-- Second Row-->
 
 
-                <LinearLayout
+            <!--    <LinearLayout
                     android:id="@+id/btn_timer"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
@@ -272,7 +272,7 @@
                         android:textColor="@color/colorWhite"
                         android:textSize="18sp" />
 
-                </LinearLayout>
+                </LinearLayout>-->
 
             </LinearLayout>
 

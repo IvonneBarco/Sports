@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -45,6 +46,8 @@ public class OpcionesActivity extends AppCompatActivity
         IDUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_ID_USUARIO_LOGIN);
         ROLEUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_ROLE_USUARIO_LOGIN);
 
+        Log.i("DATOS: ", NOMBREUSUARIO);
+
         ((TextView) findViewById(R.id.nom_usuario_home)).setText("¡HOLA " + NOMBREUSUARIO.toUpperCase() + "!");
         ((TextView) findViewById(R.id.role_usuario_home)).setText(ROLEUSUARIO.toUpperCase());
 
@@ -67,7 +70,7 @@ public class OpcionesActivity extends AppCompatActivity
         sports = findViewById(R.id.btn_sports);
         plans = findViewById(R.id.btn_plans);
         settings = findViewById(R.id.btn_settings);
-        time = findViewById(R.id.btn_timer);
+        //time = findViewById(R.id.btn_timer);
 
         sports.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,14 +116,14 @@ public class OpcionesActivity extends AppCompatActivity
             }
         });
 
-        time.setOnClickListener(new View.OnClickListener() {
+        /*time.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Toast.makeText(OpcionesActivity.this, "Iniciar entrenamiento", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(OpcionesActivity.this, IniciarEntreno.class);
                 startActivity(intent);
             }
-        });
+        });*/
 
         //////////////////////// HOME ///////////////////////////////////////
     }

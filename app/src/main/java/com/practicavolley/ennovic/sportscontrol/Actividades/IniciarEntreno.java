@@ -5,22 +5,34 @@ import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +42,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -51,15 +65,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import es.dmoral.toasty.Toasty;
 
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static java.lang.Integer.valueOf;
 
 public class IniciarEntreno extends AppCompatActivity {
+
+    private static final String CARPETA_PRINCIPAL = "misImagenesApp/";//directorio principal
+    private static final String CARPETA_IMAGEN = "SportControl";//carpeta donde se guardan las fotos
+    private static final String DIRECTORIO_IMAGEN = CARPETA_PRINCIPAL + CARPETA_IMAGEN;//ruta carpeta de directorios
+    private String path;//almacena la ruta de la imagen
+    File fileImagen;
+    Bitmap bitmap;
 
     private final int MIS_PERMISOS = 100;
     private static final int COD_SELECCIONA = 10;
@@ -92,6 +118,12 @@ public class IniciarEntreno extends AppCompatActivity {
     private String id_entrenamiento;
     int idliga = 1;
 
+
+    //Foto
+    ImageButton btnFoto;
+    ImageView imgFoto;
+    ProgressDialog progreso;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,6 +153,8 @@ public class IniciarEntreno extends AppCompatActivity {
         iniciar = (Button) findViewById(R.id.btnagregar);
         actualizar = (Button) findViewById(R.id.btnagregar2);
         parar = (Button) findViewById(R.id.btnagregar3);
+        btnFoto = (ImageButton) findViewById(R.id.btnFoto);
+        imgFoto = (ImageView) findViewById(R.id.imgFoto);
 
         campoEntrenamiento.setText(String.valueOf(getIntent().getStringExtra("nom_entrenamiento")));
 
@@ -131,6 +165,7 @@ public class IniciarEntreno extends AppCompatActivity {
         actualizar.setEnabled(false);
 
         parar.setEnabled(false);
+
         spinner = (Spinner) findViewById(R.id.spinner);
 
         layout_check = (LinearLayout) findViewById(R.id.base_layout);
@@ -138,11 +173,19 @@ public class IniciarEntreno extends AppCompatActivity {
         //this.listarAthletas();
         this.datoscheck();
 
+        //Permisos
+        if (solicitaPermisosVersionesSuperiores()) {
+            btnFoto.setEnabled(true);
+        } else {
+            btnFoto.setEnabled(false);
+        }
+
 
         iniciar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogoIniciarEntrenamiento();
+                //registrar();
             }
         });
 
@@ -184,6 +227,14 @@ public class IniciarEntreno extends AppCompatActivity {
 
         });
 
+        btnFoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mostrarDialogOpciones();
+            }
+        });
+
+
         //gps
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationListener = new LocationListener() {
@@ -215,6 +266,154 @@ public class IniciarEntreno extends AppCompatActivity {
         }
     }
 
+    private void mostrarDialogOpciones() {
+        final CharSequence[] opciones = {"Tomar Foto", "Elegir de Galeria", "Cancelar"};
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Elige una Opción");
+        builder.setItems(opciones, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (opciones[i].equals("Tomar Foto")) {
+                    abriCamara();
+                } else {
+                    if (opciones[i].equals("Elegir de Galeria")) {
+                        Intent intent = new Intent(Intent.ACTION_PICK,
+                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                        intent.setType("image/");
+                        startActivityForResult(intent.createChooser(intent, "Seleccione"), COD_SELECCIONA);
+                    } else {
+                        dialogInterface.dismiss();
+                    }
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void abriCamara() {
+        File miFile = new File(Environment.getExternalStorageDirectory(), DIRECTORIO_IMAGEN);
+        boolean isCreada = miFile.exists();
+
+        if (isCreada == false) {
+            isCreada = miFile.mkdirs();
+        }
+
+        if (isCreada == true) {
+            Long consecutivo = System.currentTimeMillis() / 1000;
+            String nombre = consecutivo.toString() + ".jpg";
+
+            path = Environment.getExternalStorageDirectory() + File.separator + DIRECTORIO_IMAGEN
+                    + File.separator + nombre;//indicamos la ruta de almacenamiento
+
+            fileImagen = new File(path);
+
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(fileImagen));
+
+            ////
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                String authorities = this.getPackageName() + ".provider";
+                Uri imageUri = FileProvider.getUriForFile(this, authorities, fileImagen);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            } else {
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(fileImagen));
+            }
+            startActivityForResult(intent, COD_FOTO);
+
+            ////
+
+        }
+
+    }
+
+    private String convertirImgString(Bitmap bitmap) {
+
+        ByteArrayOutputStream array = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, array);
+        byte[] imagenByte = array.toByteArray();
+        String imagenString = Base64.encodeToString(imagenByte, Base64.DEFAULT);
+
+        return imagenString;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case COD_SELECCIONA:
+                Uri miPath = data.getData();
+                imgFoto.setImageURI(miPath);
+
+                try {
+                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), miPath);
+                    imgFoto.setImageBitmap(bitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case COD_FOTO:
+                MediaScannerConnection.scanFile(this, new String[]{path}, null,
+                        new MediaScannerConnection.OnScanCompletedListener() {
+                            @Override
+                            public void onScanCompleted(String path, Uri uri) {
+                                Log.i("Path", "" + path);
+                            }
+                        });
+
+                bitmap = BitmapFactory.decodeFile(path);
+                imgFoto.setImageBitmap(bitmap);
+
+                break;
+        }
+        bitmap = redimensionarImagen(bitmap, 600, 800);
+    }
+
+    private Bitmap redimensionarImagen(Bitmap bitmap, float anchoNuevo, float altoNuevo) {
+
+        int ancho = bitmap.getWidth();
+        int alto = bitmap.getHeight();
+
+        if (ancho > anchoNuevo || alto > altoNuevo) {
+            float escalaAncho = anchoNuevo / ancho;
+            float escalaAlto = altoNuevo / alto;
+
+            Matrix matrix = new Matrix();
+            matrix.postScale(escalaAncho, escalaAlto);
+
+            return Bitmap.createBitmap(bitmap, 0, 0, ancho, alto, matrix, false);
+
+        } else {
+            return bitmap;
+        }
+    }
+
+
+    //permisos
+    ////////////////
+
+    private boolean solicitaPermisosVersionesSuperiores() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {//validamos si estamos en android menor a 6 para no buscar los permisos
+            return true;
+        }
+
+        //validamos si los permisos ya fueron aceptados
+        if ((this.checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) && this.checkSelfPermission(CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+
+        if ((shouldShowRequestPermissionRationale(WRITE_EXTERNAL_STORAGE) || (shouldShowRequestPermissionRationale(CAMERA)))) {
+            cargarDialogoRecomendacion();
+        } else {
+            requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE, CAMERA}, MIS_PERMISOS);
+        }
+
+
+        return false;//implementamos el que procesa el evento dependiendo de lo que se defina aqui
+    }
+
     private View.OnClickListener ckListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -230,19 +429,39 @@ public class IniciarEntreno extends AppCompatActivity {
 
     public void registrar() {
 
+        progreso = new ProgressDialog(this);
+        progreso.setMessage("Cargando...");
+        progreso.show();
+
+
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "registrar-entrenos.php", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+                progreso.hide();
+
+                //Toast.makeText(IniciarEntreno.this, estadox, Toast.LENGTH_LONG).show();
+                notificacionEntrenamientoIniciado();
+                Toasty.success(IniciarEntreno.this, "ENTRENAMIENTO INICIADO", Toast.LENGTH_LONG).show();
+
+                DesactivarBoton(iniciar, false);
+                iniciar.setEnabled(false);
+                descripcion.setEnabled(false);
+                spinner.setEnabled(false);
+                parar.setEnabled(true);
+                actualizar.setEnabled(true);
+
                 Entreno user = new Entreno();
                 try {
                     JSONObject objresultado = new JSONObject(response);
                     String estadox = objresultado.get("estado").toString();
                     identificador = objresultado.get("id").toString();
+                    Toast.makeText(IniciarEntreno.this, estadox,Toast.LENGTH_LONG).show();
                     if (!estadox.equalsIgnoreCase("exito")) {
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
                         Toast.makeText(IniciarEntreno.this, "error", Toast.LENGTH_LONG).show();
+
                     } else {
                         //Toast.makeText(Registrar2.this, identificador,Toast.LENGTH_LONG).show();
 
@@ -251,16 +470,8 @@ public class IniciarEntreno extends AppCompatActivity {
 
                             registrarAthletas(tmp, cadena);
                             chekedguardList.add(marcados);
-
-
+                            Log.i("Lista: ", marcados.toString());
                         }
-                        DesactivarBoton(iniciar, false);
-                        iniciar.setEnabled(false);
-                        descripcion.setEnabled(false);
-                        actualizar.setEnabled(true);
-                        parar.setEnabled(true);
-                        spinner.setEnabled(false);
-
 
                     }
 
@@ -268,23 +479,26 @@ public class IniciarEntreno extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
+
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
-
+                Toast.makeText(IniciarEntreno.this, "No se ha podido conectar", Toast.LENGTH_SHORT).show();
+                progreso.hide();
             }
         }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
 
                 String id_entrenamiento = String.valueOf(getIntent().getStringExtra("id_entrenamiento"));
+                String imagen = convertirImgString(bitmap);
 
                 Map<String, String> params = new HashMap<>();
                 params.put("gps", e_latitud.getText().toString());
                 params.put("entrenop", id_entrenamiento);
                 params.put("descripcion", descripcion.getText().toString());
+                params.put("imagen", imagen);
 
                 return params;
             }
@@ -335,7 +549,6 @@ public class IniciarEntreno extends AppCompatActivity {
 
     public void pararentreno() {
 
-
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
@@ -345,12 +558,13 @@ public class IniciarEntreno extends AppCompatActivity {
                 try {
                     JSONObject objresultado = new JSONObject(response);
                     String estadox = objresultado.get("estado").toString();
+                    Toast.makeText(IniciarEntreno.this, estadox,Toast.LENGTH_LONG).show();
                     if (!estadox.equalsIgnoreCase("exito")) {
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
                         Toast.makeText(IniciarEntreno.this, "error", Toast.LENGTH_LONG).show();
                     } else {
-                        //Toast.makeText(Registrar2.this, "error",Toast.LENGTH_LONG).show();
                         Intent intent = new Intent(IniciarEntreno.this, OpcionesActivity.class);
+                        intent.putExtra("DATOS_USER", user);
                         startActivity(intent);
 
                     }
@@ -371,7 +585,7 @@ public class IniciarEntreno extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
                 params.put("id", identificador);
-
+                params.put("gps2", e_latitud.getText().toString());
                 return params;
             }
         };
@@ -414,7 +628,7 @@ public class IniciarEntreno extends AppCompatActivity {
 
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-                                 //Toast.makeText(adapterView.getContext(),datosid[valueOf(id_entrenamiento)].toString(), Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(adapterView.getContext(),datosid[valueOf(id_entrenamiento)].toString(), Toast.LENGTH_SHORT).show();
                                 tmp = datosid[pos].toString();
                                 listarAthletas(tmp);
                             }
@@ -439,6 +653,15 @@ public class IniciarEntreno extends AppCompatActivity {
 
             }
         }) {
+
+            //
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("id", IDUSUARIO);
+
+                return params;
+            }
 
 
         };
@@ -471,7 +694,7 @@ public class IniciarEntreno extends AppCompatActivity {
 
                             CheckBox cb = new CheckBox(IniciarEntreno.this);
                             cb.setId(valueOf(arrsemana.getInt("athlete")));
-                            cb.setText(arrsemana.getString("nombre")+ " " + arrsemana.getString("apellido"));
+                            cb.setText(arrsemana.getString("nombre") + " " + arrsemana.getString("apellido"));
                             cb.setOnClickListener(ckListener);
                             layout_check.addView(cb);
 
@@ -612,7 +835,7 @@ public class IniciarEntreno extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         registrar();
-                        notificacionEntrenamientoIniciado();
+
                     }
                 })
                 .setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
@@ -723,6 +946,22 @@ public class IniciarEntreno extends AppCompatActivity {
         android.support.v7.app.AlertDialog titulo = alerta.create();
         titulo.setTitle("¿Está seguro que desea salir?");
         titulo.show();
+    }
+
+    private void cargarDialogoRecomendacion() {
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this);
+        dialogo.setTitle("Permisos Desactivados");
+        dialogo.setMessage("Debe aceptar los permisos para el correcto funcionamiento de la App");
+
+        dialogo.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    requestPermissions(new String[]{WRITE_EXTERNAL_STORAGE, CAMERA}, 100);
+                }
+            }
+        });
+        dialogo.show();
     }
 
     //Menu home
