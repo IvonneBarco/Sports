@@ -456,7 +456,7 @@ public class IniciarEntreno extends AppCompatActivity {
                 try {
                     JSONObject objresultado = new JSONObject(response);
                     String estadox = objresultado.get("estado").toString();
-                    identificador = objresultado.get("id").toString();
+                    identificador=objresultado.get("id").toString();
                     Toast.makeText(IniciarEntreno.this, estadox,Toast.LENGTH_LONG).show();
                     if (!estadox.equalsIgnoreCase("exito")) {
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
@@ -549,22 +549,21 @@ public class IniciarEntreno extends AppCompatActivity {
 
     public void pararentreno() {
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue= Volley.newRequestQueue(this);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
+        StringRequest stringRequest=new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Entreno user = new Entreno();
+                Entreno user=new Entreno();
                 try {
-                    JSONObject objresultado = new JSONObject(response);
-                    String estadox = objresultado.get("estado").toString();
-                    Toast.makeText(IniciarEntreno.this, estadox,Toast.LENGTH_LONG).show();
-                    if (!estadox.equalsIgnoreCase("exito")) {
+                    JSONObject objresultado=new JSONObject(response);
+                    String estadox=objresultado.get("estado").toString();
+                    if(!estadox.equalsIgnoreCase("exito")){
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
-                        Toast.makeText(IniciarEntreno.this, "error", Toast.LENGTH_LONG).show();
-                    } else {
-                        Intent intent = new Intent(IniciarEntreno.this, OpcionesActivity.class);
-                        intent.putExtra("DATOS_USER", user);
+                        Toast.makeText(IniciarEntreno.this, "error",Toast.LENGTH_LONG).show();
+                    }else{
+                        //Toast.makeText(Registrar2.this, "error",Toast.LENGTH_LONG).show();
+                        Intent intent =new Intent(IniciarEntreno.this,OpcionesActivity.class);
                         startActivity(intent);
 
                     }
@@ -580,12 +579,12 @@ public class IniciarEntreno extends AppCompatActivity {
 
 
             }
-        }) {
+        }){
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("id", identificador);
-                params.put("gps2", e_latitud.getText().toString());
+                Map<String, String> params=new HashMap<>();
+                params.put("id",identificador);
+
                 return params;
             }
         };

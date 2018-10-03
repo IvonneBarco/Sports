@@ -53,7 +53,7 @@
                     android:id="@+id/spinner"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="visible"/>
+                    android:visibility="invisible"/>
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
@@ -172,6 +172,17 @@
                         android:textStyle="bold"
                         android:theme="@style/StyleButton" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    android:paddingTop="10dp"
+                    android:text="LISTA DEPORTISTAS"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="22sp"
+                    android:textStyle="bold|normal" />
 
 
                 <LinearLayout

@@ -1,5 +1,6 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -33,6 +34,8 @@ public class OpcionesActivity extends AppCompatActivity
     TextView nombreUsuario, rolUsuario, listarUsuario;
     public Usuario user;
     private String NOMBREUSUARIO, APELLIDOUSUARIO, IDUSUARIO, ROLEUSUARIO;
+
+    ProgressDialog progreso;
 
 
     @Override
@@ -84,7 +87,7 @@ public class OpcionesActivity extends AppCompatActivity
         group.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(OpcionesActivity.this, "Grupo de apoyo", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(OpcionesActivity.this, "Grupo de apoyo", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(OpcionesActivity.this, ListaAtletas.class);
                 startActivity(intent);
             }
@@ -209,9 +212,13 @@ public class OpcionesActivity extends AppCompatActivity
                 .setPositiveButton("SI", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        progreso = new ProgressDialog(OpcionesActivity.this);
+                        progreso.setMessage("Cerrando Sesión...");
+                        progreso.show();
                         //Codigo de cerrar sesión
                         Intent intent = new Intent(OpcionesActivity.this, LoginActivity.class);
                         startActivity(intent);
+                        progreso.hide();
                         finish();
                     }
                 })

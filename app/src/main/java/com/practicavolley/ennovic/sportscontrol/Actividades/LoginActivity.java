@@ -1,9 +1,11 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +31,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import es.dmoral.toasty.Toasty;
+
 public class LoginActivity extends AppCompatActivity {
 
     EditText username;
@@ -39,6 +43,8 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isActivateRadioButton;
     private VolleyRP volley;
     private RequestQueue mrequestQueue;
+
+    ProgressDialog progreso;
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -83,6 +89,10 @@ public class LoginActivity extends AppCompatActivity {
 
     //Aquí va el metoodo IniciarSesión();
     public void iniciarSesion() {
+
+        progreso = new ProgressDialog(this);
+        progreso.setMessage("Iniciando Sesión...");
+        progreso.show();
         RequestQueue queue = Volley.newRequestQueue(LoginActivity.this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "iniciar-sesion.php",
@@ -94,9 +104,11 @@ public class LoginActivity extends AppCompatActivity {
                             JSONObject objResultado = new JSONObject(response);
                             String estado = objResultado.get("estado").toString();
                             if (!estado.equalsIgnoreCase("exito")) {
-                                Toast.makeText(LoginActivity.this, "Usuario o contraseña incorrecta", Toast.LENGTH_LONG).show();
+                                progreso.hide();
+                                Toasty.error(LoginActivity.this, "Usuario o contraseña incorrecta", Toast.LENGTH_LONG).show();
 
                             } else {
+                                progreso.hide();
                                 user.setId(objResultado.getJSONObject("datos").optInt("id"));
                                 user.setUsername(objResultado.getJSONObject("datos").optString("username"));
                                 user.setNombre(objResultado.getJSONObject("datos").optString("nombre"));
