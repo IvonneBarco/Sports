@@ -457,8 +457,8 @@ public class IniciarEntreno extends AppCompatActivity {
                 try {
                     JSONObject objresultado = new JSONObject(response);
                     String estadox = objresultado.get("estado").toString();
-                    identificador=objresultado.get("id").toString();
-                    Toast.makeText(IniciarEntreno.this, estadox,Toast.LENGTH_LONG).show();
+                    identificador = objresultado.get("id").toString();
+                    Toast.makeText(IniciarEntreno.this, estadox, Toast.LENGTH_LONG).show();
                     if (!estadox.equalsIgnoreCase("exito")) {
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
                         Toast.makeText(IniciarEntreno.this, "error", Toast.LENGTH_LONG).show();
@@ -561,21 +561,21 @@ public class IniciarEntreno extends AppCompatActivity {
             locationManager.removeUpdates(locationListener);
         }
 
-        RequestQueue queue= Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        StringRequest stringRequest=new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Entreno user=new Entreno();
+                Entreno user = new Entreno();
                 try {
-                    JSONObject objresultado=new JSONObject(response);
-                    String estadox=objresultado.get("estado").toString();
-                    if(!estadox.equalsIgnoreCase("exito")){
+                    JSONObject objresultado = new JSONObject(response);
+                    String estadox = objresultado.get("estado").toString();
+                    if (!estadox.equalsIgnoreCase("exito")) {
                         //Toast.makeText(this,"errot",Toast.LENGTH_LONG).show();
-                        Toast.makeText(IniciarEntreno.this, "error",Toast.LENGTH_LONG).show();
-                    }else{
+                        Toast.makeText(IniciarEntreno.this, "error", Toast.LENGTH_LONG).show();
+                    } else {
                         //Toast.makeText(Registrar2.this, "error",Toast.LENGTH_LONG).show();
-                        Intent intent =new Intent(IniciarEntreno.this,OpcionesActivity.class);
+                        Intent intent = new Intent(IniciarEntreno.this, OpcionesActivity.class);
                         startActivity(intent);
 
                     }
@@ -591,11 +591,11 @@ public class IniciarEntreno extends AppCompatActivity {
 
 
             }
-        }){
+        }) {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params=new HashMap<>();
-                params.put("id",identificador);
+                Map<String, String> params = new HashMap<>();
+                params.put("id", identificador);
                 params.put("gps2", coordenadas.getText().toString());
                 return params;
             }
@@ -787,9 +787,33 @@ public class IniciarEntreno extends AppCompatActivity {
         alertaGPS
                 .show();
     }
-/*
-     @Override
-   protected void onPause() {
+
+    /*
+         @Override
+       protected void onPause() {
+            super.onPause();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    return;
+                } else {
+                    locationManager.removeUpdates(locationListener);
+                }
+            } else {
+                locationManager.removeUpdates(locationListener);
+            }
+        }
+    */
+    @Override
+    public void onBackPressed() {
+        DialogoSalirEntrenamiento();
+    }
+
+    //Dialogos
+
+    public void DialogoRegresarrEntrenamiento() {
+
         super.onPause();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -802,20 +826,12 @@ public class IniciarEntreno extends AppCompatActivity {
         } else {
             locationManager.removeUpdates(locationListener);
         }
-    }
-*/
-    @Override
-    public void onBackPressed() {
-        DialogoSalirEntrenamiento();
-    }
 
-    //Dialogos
-
-    public void DialogoRegresarrEntrenamiento() {
         android.support.v7.app.AlertDialog.Builder alerta = new android.support.v7.app.AlertDialog.Builder(IniciarEntreno.this);
         alerta.setMessage("")
                 .setCancelable(false)
                 .setPositiveButton("SI", new DialogInterface.OnClickListener() {
+
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -823,6 +839,8 @@ public class IniciarEntreno extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     }
+
+
                 })
                 .setNegativeButton("CANCELAR", new DialogInterface.OnClickListener() {
                     @Override
@@ -940,6 +958,7 @@ public class IniciarEntreno extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
 
+                        GpsStop();
                         Intent intent = new Intent(IniciarEntreno.this, Entrenamientos.class);
                         startActivity(intent);
                         finish();
@@ -987,6 +1006,20 @@ public class IniciarEntreno extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        super.onPause();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                return true;
+            } else {
+                locationManager.removeUpdates(locationListener);
+            }
+        } else {
+            locationManager.removeUpdates(locationListener);
+        }
+
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -995,6 +1028,8 @@ public class IniciarEntreno extends AppCompatActivity {
             /*Intent i = new Intent(InicioEntrenamiento.this, OpcionesActivity.class);
             startActivity(i);
             finish();*/
+
+
             DialogoRegresarrEntrenamiento();
             return true;
         }
@@ -1013,5 +1048,21 @@ public class IniciarEntreno extends AppCompatActivity {
     public void ActivarBoton(Button botona, Boolean c) {
         botona.setEnabled(true);
         botona.setBackgroundColor(R.color.colorPrimaryDark);
+    }
+
+
+    public void GpsStop() {
+        super.onPause();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                return;
+            } else {
+                locationManager.removeUpdates(locationListener);
+            }
+        } else {
+            locationManager.removeUpdates(locationListener);
+        }
     }
 }

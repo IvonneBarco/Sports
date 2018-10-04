@@ -264,7 +264,7 @@ public class ListaAtletas extends AppCompatActivity {
 
         try {
             Drawable icon = getResources().getDrawable(R.drawable.ic_empty);
-            Toasty.normal(this, "Configuraciones", icon).show();
+            Toasty.normal(this, "Preparando para enviar email", icon).show();
             startActivity(Intent.createChooser(emailIntent, "Enviar email..."));
             finish();
         } catch (android.content.ActivityNotFoundException ex) {
