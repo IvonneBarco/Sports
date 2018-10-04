@@ -1,5 +1,6 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -56,6 +57,8 @@ public class Entrenadores extends AppCompatActivity {
     //Refencia al reclycler
     RecyclerView recyclerEntrenadores;
 
+    ProgressDialog progreso;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,11 +100,17 @@ public class Entrenadores extends AppCompatActivity {
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(Entrenadores.this);
 
+        progreso = new ProgressDialog(this);
+        progreso.setMessage("Cargando...");
+        progreso.setCancelable(false);
+        progreso.show();
+
         // Initialize a new JsonArrayRequest instance
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "listar-entrenadores.php",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progreso.hide();
 
                         EntrenadoresVo coach = null;
 

@@ -1,5 +1,6 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public class Ligas extends AppCompatActivity {
 
     //RECYCLER
     ArrayList<LigasVo> listaLigas;
+    ProgressDialog progreso;
 
     //Refencia al reclycler
     RecyclerView recyclerLigas;
@@ -97,11 +99,17 @@ public class Ligas extends AppCompatActivity {
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(Ligas.this);
 
+        progreso = new ProgressDialog(this);
+        progreso.setMessage("Cargando...");
+        progreso.setCancelable(false);
+        progreso.show();
+
         // Initialize a new JsonArrayRequest instance
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "listar-ligas.php",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progreso.hide();
 
                         LigasVo liga = null;
 
@@ -129,6 +137,7 @@ public class Ligas extends AppCompatActivity {
 
                                 }
                                 AdaptadorLigas adapter = new AdaptadorLigas(listaLigas);
+
                                 //evento click
                                 adapter.setOnClickListener(new View.OnClickListener() {
                                     @Override

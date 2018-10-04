@@ -12,8 +12,8 @@
 
         <ImageView
             android:id="@+id/id_imagen_atleta_elist"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@mipmap/ic_launcher"/>
 
         <LinearLayout
@@ -30,15 +30,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
                 android:textSize="16sp"
+                android:visibility="invisible"
                 android:text="1"/>
 
             <TextView
                 android:id="@+id/id_nombre_atleta_entreno_elist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text=" NOMBRE ATLETA"
                 android:textSize="16sp"
-                android:textStyle="bold|normal"
-                android:text= " NOMBRE ATLETA"/>
+                android:textStyle="bold|normal" />
 
 
         </LinearLayout>

@@ -108,8 +108,8 @@ public class IniciarEntreno extends AppCompatActivity {
     ArrayList<Integer> chekedguardList = new ArrayList<Integer>();
 
     //gps
-    //TextView latitud, longitud;
-    EditText e_latitud, e_longitud;
+    //TextView coordenadas;
+    EditText coordenadas, e_longitud;
     LocationManager locationManager;
     LocationListener locationListener;
     android.app.AlertDialog alertaGPS = null;
@@ -159,8 +159,8 @@ public class IniciarEntreno extends AppCompatActivity {
         campoEntrenamiento.setText(String.valueOf(getIntent().getStringExtra("nom_entrenamiento")));
 
         //gps
-        //latitud = (TextView) findViewById(R.id.t_latitud_id);
-        e_latitud = (EditText) findViewById(R.id.e_latitud_id);
+        //coordenadas = (TextView) findViewById(R.id.id_coordenadas);
+        coordenadas = (EditText) findViewById(R.id.e_latitud_id);
 
         actualizar.setEnabled(false);
 
@@ -185,7 +185,6 @@ public class IniciarEntreno extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DialogoIniciarEntrenamiento();
-                //registrar();
             }
         });
 
@@ -431,12 +430,14 @@ public class IniciarEntreno extends AppCompatActivity {
 
         progreso = new ProgressDialog(this);
         progreso.setMessage("Cargando...");
+        progreso.setCancelable(false);
         progreso.show();
 
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "registrar-entrenos.php", new Response.Listener<String>() {
+
             @Override
             public void onResponse(String response) {
                 progreso.hide();
@@ -478,8 +479,6 @@ public class IniciarEntreno extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-
             }
         }, new Response.ErrorListener() {
             @Override
@@ -495,7 +494,7 @@ public class IniciarEntreno extends AppCompatActivity {
                 String imagen = convertirImgString(bitmap);
 
                 Map<String, String> params = new HashMap<>();
-                params.put("gps", e_latitud.getText().toString());
+                params.put("gps", coordenadas.getText().toString());
                 params.put("entrenop", id_entrenamiento);
                 params.put("descripcion", descripcion.getText().toString());
                 params.put("imagen", imagen);
@@ -549,6 +548,19 @@ public class IniciarEntreno extends AppCompatActivity {
 
     public void pararentreno() {
 
+        super.onPause();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                return;
+            } else {
+                locationManager.removeUpdates(locationListener);
+            }
+        } else {
+            locationManager.removeUpdates(locationListener);
+        }
+
         RequestQueue queue= Volley.newRequestQueue(this);
 
         StringRequest stringRequest=new StringRequest(Request.Method.POST, Conexion.URL_WEB_SERVICES + "actualizar-entrenos.php", new Response.Listener<String>() {
@@ -584,7 +596,7 @@ public class IniciarEntreno extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params=new HashMap<>();
                 params.put("id",identificador);
-
+                params.put("gps2", coordenadas.getText().toString());
                 return params;
             }
         };
@@ -750,7 +762,7 @@ public class IniciarEntreno extends AppCompatActivity {
 
         //latitud.setText("Latitud: " + Double.toString(location.getLatitude()));
         //longitud.setText("Longitud: " + Double.toString(location.getLongitude()));
-        e_latitud.setText("" + Double.toString(location.getLatitude()) + "," + "" + Double.toString(location.getLongitude()));
+        coordenadas.setText("" + Double.toString(location.getLatitude()) + "," + "" + Double.toString(location.getLongitude()));
         //latitud.setText("Latitud: " + Double.toString(location.getLatitude()) + " - " + "Longitud: " + Double.toString(location.getLongitude()));
         //e_longitud.setText("Longitud: " + Double.toString(location.getLongitude()));
 
@@ -775,9 +787,9 @@ public class IniciarEntreno extends AppCompatActivity {
         alertaGPS
                 .show();
     }
-
-    @Override
-    protected void onPause() {
+/*
+     @Override
+   protected void onPause() {
         super.onPause();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
@@ -790,10 +802,8 @@ public class IniciarEntreno extends AppCompatActivity {
         } else {
             locationManager.removeUpdates(locationListener);
         }
-
-
     }
-
+*/
     @Override
     public void onBackPressed() {
         DialogoSalirEntrenamiento();

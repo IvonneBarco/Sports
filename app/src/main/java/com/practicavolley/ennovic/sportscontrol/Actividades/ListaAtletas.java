@@ -1,5 +1,6 @@
 package com.practicavolley.ennovic.sportscontrol.Actividades;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -54,6 +55,8 @@ public class ListaAtletas extends AppCompatActivity {
     String[] datosid;
     String[][] datos = null;
 
+    ProgressDialog progreso;
+
 
     //RECYCLER
     ArrayList<AtletaVo> listaAtletas;
@@ -102,6 +105,11 @@ public class ListaAtletas extends AppCompatActivity {
 
     private void listarAsistencia() {
 
+        progreso = new ProgressDialog(this);
+        progreso.setMessage("Cargando...");
+        progreso.setCancelable(false);
+        progreso.show();
+
         // Initialize a new RequestQueue instance
         RequestQueue requestQueue = Volley.newRequestQueue(ListaAtletas.this);
 
@@ -110,6 +118,7 @@ public class ListaAtletas extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        progreso.hide();
 
                         AtletaVo athlete = null;
 
@@ -250,10 +259,12 @@ public class ListaAtletas extends AppCompatActivity {
         emailIntent.putExtra(Intent.EXTRA_EMAIL, TO);
         emailIntent.putExtra(Intent.EXTRA_CC, CC);
 // Esto podrás modificarlo si quieres, el asunto y el cuerpo del mensaje
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Solicitud de apoyo");
-        emailIntent.putExtra(Intent.EXTRA_TEXT, "Hola, el entrenador " + entrenador +" solicita tus conocimientos para que pueda ayudar a su deportista "+nombre+" comunicate con el lo mas pronto posible y acuerden el lugar y la fecha muchas gracias.");
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "SOLICITUD DE APOYO");
+        emailIntent.putExtra(Intent.EXTRA_TEXT, "Hola!, \n \n El entrenador " + entrenador + " solicita tu conocimiento para ayudar a su deportista " + nombre + ". \n Por favor, comunícate con él lo más pronto posible para acordar una fecha y hora de encuentro. \n \n Gracias por tu colabración!");
 
         try {
+            Drawable icon = getResources().getDrawable(R.drawable.ic_empty);
+            Toasty.normal(this, "Configuraciones", icon).show();
             startActivity(Intent.createChooser(emailIntent, "Enviar email..."));
             finish();
         } catch (android.content.ActivityNotFoundException ex) {

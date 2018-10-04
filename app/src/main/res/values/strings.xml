@@ -22,7 +22,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Sports Control</string>
-    <string name="nav_header_subtitle">www.sportscontrol.com</string>
+    <string name="nav_header_subtitle">www.sportcontrol.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_exit">Cerrar Sesión</string>
 

@@ -115,7 +115,8 @@ public class OpcionesActivity extends AppCompatActivity
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(OpcionesActivity.this, "Configuración", Toast.LENGTH_SHORT).show();
+                Drawable icon = getResources().getDrawable(R.drawable.ic_settings);
+                Toasty.normal(OpcionesActivity.this, "Configuraciones", icon).show();
             }
         });
 
@@ -173,11 +174,12 @@ public class OpcionesActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_training_start:
-                Intent intentStart = new Intent(OpcionesActivity.this.getBaseContext(), InicioEntrenamiento.class);
+                Intent intentStart = new Intent(OpcionesActivity.this.getBaseContext(), Entrenamientos.class);
                 startActivity(intentStart);
                 break;
             case R.id.nav_group:
-
+                Intent intentGroup = new Intent(OpcionesActivity.this.getBaseContext(), ListaAtletas.class);
+                startActivity(intentGroup);
                 break;
             case R.id.nav_training:
                 Intent intentTraining = new Intent(OpcionesActivity.this.getBaseContext(), Entrenamientos.class);
@@ -188,11 +190,8 @@ public class OpcionesActivity extends AppCompatActivity
                 startActivity(intentSports);
                 break;
             case R.id.nav_settings:
-                //Toast.makeText(this, "Configuraciones", Toast.LENGTH_SHORT).show();
                 Drawable icon = getResources().getDrawable(R.drawable.ic_settings);
                 Toasty.normal(this, "Configuraciones", icon).show();
-                Intent intentE= new Intent(OpcionesActivity.this.getBaseContext(), CargarImagen.class);
-                startActivity(intentE);
                 break;
             case R.id.nav_exit:
                 Preferences.savePreferencesBoolean(this, false, Preferences.PREFERENCES_ESTADO_SWITCH);

@@ -57,6 +57,7 @@ public class Entrenamientos extends AppCompatActivity {
 
         progreso = new ProgressDialog(this);
         progreso.setMessage("Cargando entramientos...");
+        progreso.setCancelable(false);
         progreso.show();
 
         IDUSUARIO = Preferences.obtenerPreferencesString(this, Preferences.PREFERENCE_ID_USUARIO_LOGIN);
@@ -141,7 +142,7 @@ public class Entrenamientos extends AppCompatActivity {
                                 adapter.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
-                                        Toast.makeText(getApplicationContext(), "" + listaEntrenamiento.get(recyclerEntrenamientos.getChildAdapterPosition(view)).getId_entrenamiento(), Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(getApplicationContext(), "" + listaEntrenamiento.get(recyclerEntrenamientos.getChildAdapterPosition(view)).getId_entrenamiento(), Toast.LENGTH_SHORT).show();
 
                                         //Envio de variables DATOS_USER
                                         Intent intent = new Intent(Entrenamientos.this, IniciarEntreno.class);
